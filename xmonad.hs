@@ -10,6 +10,7 @@ import Data.Monoid
 import Graphics.X11.ExtraTypes.XF86 
 import System.Exit
 import XMonad
+import XMonad.Hooks.ManageDocks
 import XMonad.Layout.Spacing
 import XMonad.Util.Run
 import qualified XMonad.StackSet as W
@@ -209,7 +210,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayoutHook = tiled ||| Mirror tiled ||| Full
+myLayoutHook = avoidStruts (tiled ||| Mirror tiled) ||| Full
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = spacingRaw False (Border 10 10 10 10) True (Border 10 10 10 10) True $ Tall nmaster delta ratio 
@@ -281,7 +282,7 @@ myStartupHook = return ()
 --
 main = do
     xmproc <- spawnPipe "xmobar -x 0 /home/nicolas/.config/xmobar/xmobarrc"
-    xmonad defaults
+    xmonad $ docks defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
