@@ -3,11 +3,15 @@
 -- 
 ------------------------------------------------------------------------
 
-import XMonad
+------------------------------------------------------------------------
+-- Imports
+------------------------------------------------------------------------
 import Data.Monoid
+import Graphics.X11.ExtraTypes.XF86 
 import System.Exit
-import Graphics.X11.ExtraTypes.XF86
-
+import XMonad
+import XMonad.Layout.Spacing
+import XMonad.Util.Run
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -48,7 +52,7 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
+myNormalBorderColor  = "#000000"
 myFocusedBorderColor = "#ffffff"
 
 ------------------------------------------------------------------------
@@ -205,10 +209,10 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = tiled ||| Mirror tiled ||| Full
+myLayoutHook = tiled ||| Mirror tiled ||| Full
   where
      -- default tiling algorithm partitions the screen into two panes
-     tiled   = Tall nmaster delta ratio
+     tiled   = spacingRaw False (Border 10 10 10 10) True (Border 10 10 10 10) True $ Tall nmaster delta ratio 
 
      -- The default number of windows in the master pane
      nmaster = 1
@@ -275,7 +279,9 @@ myStartupHook = return ()
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
-main = xmonad defaults
+main = do
+    xmproc <- spawnPipe "xmobar -x 0 /home/nicolas/.config/xmobar/xmobarrc"
+    xmonad defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -299,7 +305,7 @@ defaults = def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = myLayout,
+        layoutHook         = myLayoutHook,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
         logHook            = myLogHook,
