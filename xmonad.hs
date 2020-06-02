@@ -10,8 +10,11 @@ import Data.Monoid
 import Graphics.X11.ExtraTypes.XF86 
 import System.Exit
 import XMonad
+import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
+import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
+import XMonad.Util.SpawnOnce
 import XMonad.Util.Run
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -31,7 +34,7 @@ myClickJustFocuses = False
 
 -- Width of the window border in pixels.
 --
-myBorderWidth   = 1
+myBorderWidth   = 3
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -54,7 +57,7 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 -- Border colors for unfocused and focused windows, respectively.
 --
 myNormalBorderColor  = "#000000"
-myFocusedBorderColor = "#ffffff"
+myFocusedBorderColor = "#00bbdd"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -77,7 +80,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 ------------------------------------------------------------------------
 
     -- close focused window
-    ,  ((modm .|. shiftMask,     xK_c     ), kill)
+    , ((modm .|. shiftMask,     xK_c     ), kill)
     -- Resize viewed windows to the correct size
     , ((modm,                   xK_n     ), refresh)
     -- Move focus to the next window
@@ -210,7 +213,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayoutHook = avoidStruts (tiled ||| Mirror tiled) ||| Full
+myLayoutHook = avoidStruts (smartBorders (tiled ||| Mirror tiled)) ||| noBorders Full
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled   = spacingRaw False (Border 10 10 10 10) True (Border 10 10 10 10) True $ Tall nmaster delta ratio 
@@ -219,7 +222,7 @@ myLayoutHook = avoidStruts (tiled ||| Mirror tiled) ||| Full
      nmaster = 1
 
      -- Default proportion of screen occupied by master pane
-     ratio   = 1/2
+     ratio   = 11/20
 
      -- Percent of screen to increment by when resizing panes
      delta   = 3/100
@@ -239,12 +242,12 @@ myLayoutHook = avoidStruts (tiled ||| Mirror tiled) ||| Full
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
-myManageHook = composeAll
+myManageHook = (composeAll
     [ className =? "MPlayer"        --> doFloat
     , className =? "Gimp"           --> doFloat
     , className =? "gksu"           --> doFloat
     , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore ]
+    , resource  =? "kdesktop"       --> doIgnore ])
 
 ------------------------------------------------------------------------
 -- Event handling
@@ -264,7 +267,6 @@ myEventHook = mempty
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
 myLogHook = return ()
-
 ------------------------------------------------------------------------
 -- Startup hook
 
@@ -273,7 +275,18 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook = return ()
+myStartupHook = do 
+    spawnOnce "picom --experimental-backends --backend glx"
+    spawnOnce "gocryptfs --extpass=\"secret-tool lookup cipher /home/nicolas/.Coffre-Fort_encrypt\" /home/nicolas/.Coffre-Fort_encrypt /home/nicolas/Coffre-Fort &"
+    spawnOnce "stalonetray -c ~/.config/stalonetray/stalonetrayrc --kludges force_icons_size &"
+    spawnOnce "nm-applet &"
+    spawnOnce "blueman-tray &"
+    spawnOnce "optimus-manager-qt &"
+    spawnOnce "parcellite &"
+    spawnOnce "redshift-qt &"
+    spawnOnce "steam-runtime -silent &"
+    spawnOnce "discord --start-minimized &"
+    spawnOnce "variety > /dev/null 2>&1 &"
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
@@ -281,8 +294,8 @@ myStartupHook = return ()
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 main = do
-    xmproc <- spawnPipe "xmobar -x 0 /home/nicolas/.config/xmobar/xmobarrc"
-    xmonad $ docks defaults
+    h <- spawnPipe "xmobar -x 0 /home/nicolas/.config/xmobar/xmobarrc"
+    xmonad $ docks defaults 
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -306,8 +319,8 @@ defaults = def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = myLayoutHook,
-        manageHook         = myManageHook,
+        layoutHook         = avoidStruts $ myLayoutHook,
+        manageHook         = manageDocks <+> myManageHook,
         handleEventHook    = myEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
