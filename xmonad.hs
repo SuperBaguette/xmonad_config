@@ -243,11 +243,13 @@ myLayoutHook = avoidStruts (smartBorders (tiled ||| Mirror tiled)) ||| noBorders
 -- 'className' and 'resource' are used below.
 --
 myManageHook = (composeAll
-    [ className =? "MPlayer"        --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , className =? "gksu"           --> doFloat
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore ])
+    [ className =? "MPlayer"                --> doFloat
+    , className =? "Gimp"                   --> doFloat
+    , className =? "gksu"                   --> doFloat
+    , className =? "blueman-manager"        --> doFloat
+    , className =? "Steam"                  --> doIgnore
+    , resource  =? "desktop_window"         --> doIgnore
+    , resource  =? "kdesktop"               --> doIgnore ])
 
 ------------------------------------------------------------------------
 -- Event handling
@@ -319,7 +321,7 @@ defaults = def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = avoidStruts $ myLayoutHook,
+        layoutHook         = myLayoutHook,
         manageHook         = manageDocks <+> myManageHook,
         handleEventHook    = myEventHook,
         logHook            = myLogHook,
