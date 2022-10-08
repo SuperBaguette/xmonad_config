@@ -216,7 +216,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 myLayoutHook = avoidStruts (smartBorders (tiled ||| Mirror tiled)) ||| noBorders Full
   where
      -- default tiling algorithm partitions the screen into two panes
-     tiled   = spacingRaw False (Border 10 10 10 10) True (Border 10 10 10 10) True $ Tall nmaster delta ratio 
+     tiled   = spacingRaw False (Border 20 20 20 20) True (Border 20 20 20 20) True $ Tall nmaster delta ratio 
 
      -- The default number of windows in the master pane
      nmaster = 1
@@ -247,7 +247,7 @@ myManageHook = (composeAll
     , className =? "Gimp"                   --> doFloat
     , className =? "gksu"                   --> doFloat
     , className =? "blueman-manager"        --> doFloat
-    , className =? "Steam"                  --> doIgnore
+    , className =? "Steam"                  --> doFloat
     , resource  =? "desktop_window"         --> doIgnore
     , resource  =? "kdesktop"               --> doIgnore ])
 
